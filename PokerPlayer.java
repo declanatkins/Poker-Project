@@ -19,6 +19,10 @@ public class PokerPlayer {
 		return currBet;
 	}
 	
+	public synchronized void resetCurrBet(){
+		currBet = 0;
+	}
+	
 	public synchronized void setCurrBet(int bet){
 		currBet += bet;
 	}

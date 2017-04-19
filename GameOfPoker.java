@@ -30,7 +30,7 @@ public class GameOfPoker {
 	public ArrayList<PokerPlayer> sortPlayers(int sortPos){ //sorts an arraylist of poker players clockwise from sortPos
 		ArrayList<PokerPlayer> sorted = new ArrayList<PokerPlayer>();
 		sorted.add(players.get(sortPos)); //add dealer pos as first element
-		for(int i=0;i<numPlayers;i++){ 
+		for(int i=0;i<numPlayers-1;i++){ 
 			int j = i+sortPos+1;
 			if(j>=numPlayers){
 				j -= numPlayers;
@@ -51,12 +51,23 @@ public class GameOfPoker {
 		
 	}
 	
-	public int openingPhase(){
+	public synchronized int openingPhase(){
 		
 		for(PokerPlayer p : playersInCurrHand){
-			p.setCurrBet(0);//reset the bets to 0
+			p.resetCurrBet();//reset the bets to 0
 		}
 		
+		boolean openerExists = false;
+		for(PokerPlayer p : playersInCurrHand){
+			if(p.hasOpener()){
+				openerExists=true;
+			}
+		}
+		
+		if(!openerExists){
+			System.out.println("No one has openers, going to next hand");
+			return pot.getChips();
+		}
 		
 		for(PokerPlayer p : playersInCurrHand){
 			int openBet = 0;
@@ -74,12 +85,26 @@ public class GameOfPoker {
 					pot.setCurrBetVal(openBet); 
 					p.addChips(-openBet);
 					pot.placeBet(openBet);
+					if(openBet >0){
+						System.out.println(p.getName() + " opens with " + openBet + " chips!");
+					}
+					else{
+						System.out.println(p.getName() + " doesn't open.");
+					}
 					if(p.getChips() == 0){
 						System.out.println(p.getName() + " is all in!!");
 					}
 					break;//exit out of the loop and move to the next stage
 				}
 			}
+			else{
+				if(p.isHuman){
+					((HumanPokerPlayer)p).printHand();
+					System.out.println("You can't open as you don't have a pair or greater");
+				}
+				System.out.println(p.getName() + " doesn't open.");
+			}
+			
 			if(p == playersInCurrHand.get(playersInCurrHand.size()-1)){ //last player does not have openers
 				System.out.println("No openers new hand starting");
 				return pot.getChips(); //return chips to carry
@@ -92,6 +117,7 @@ public class GameOfPoker {
 		
 		while(!allMatched){
 			PokerPlayer p = playersInCurrHand.get(currIndex);
+			System.out.println(p.getName()+ ","+currIndex);
 			if(p.getCurrBet() < pot.getCurrBetVal()){
 				int bet;
 				if(p.isHuman){
@@ -128,6 +154,7 @@ public class GameOfPoker {
 				p.setCurrBet(bet);
 			}
 			else{
+				System.out.println(p.getName() + "," + p.getCurrBet());
 				allMatched = true;
 			}
 			
@@ -171,7 +198,7 @@ public class GameOfPoker {
 	public void finalBetPhase(){ //remember for folds to remove player from currHand
 		
 		for(PokerPlayer p : playersInCurrHand){
-			p.setCurrBet(0);//reset the bets to 0
+			p.resetCurrBet();//reset the bets to 0
 		}
 		pot.setCurrBetVal(0);
 		
@@ -243,6 +270,8 @@ public class GameOfPoker {
 	public void showDown(){
 		int highest = 0; //stores index of player with highest hand.
 		for(PokerPlayer p: playersInCurrHand){
+			System.out.println(p.getName() + " has " + p.getHand() + "!\n" + p.getHandType());
+			
 			if(p.getHandValue() > highest){
 				highest = p.getHandValue();
 				winners = new ArrayList<PokerPlayer>();
@@ -258,8 +287,16 @@ public class GameOfPoker {
 	public void endOfHand(){
 
 		for(PokerPlayer p : winners){
-			p.addChips(pot.getChips()/winners.size());
+			if(winners.size() > 1){
+				System.out.println(p.getName()+ " splits the pot and gets " + (pot.getChips()/winners.size()) + " chips!");
+			}
+			else{
+				System.out.println(p.getName()+ " wins the pot and gets " + (pot.getChips()) + " chips!");
+				p.addChips(pot.getChips());
+			}
 		}
+		System.out.println("\n\n\n\n");
+		pot.reset();
 	}
 	
 	public boolean testHandFinished(){

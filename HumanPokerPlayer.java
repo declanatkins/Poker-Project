@@ -13,7 +13,7 @@ public class HumanPokerPlayer extends PokerPlayer{
 		isHuman = true;
 	}
 	
-	private void printHand(){
+	public void printHand(){
 		System.out.println("Your hand is: " + hand);
 	}
 	

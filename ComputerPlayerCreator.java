@@ -21,11 +21,10 @@ public class ComputerPlayerCreator {
 				Scanner sc = new Scanner(file);
 				ArrayList<Integer> usedLines = new ArrayList<Integer>();
 				for(i=0;i<numPlayers;i++){
-					int pos = rand.nextInt(100);
+					int pos = rand.nextInt(99);
 					while(usedLines.contains(pos)){
-						pos = rand.nextInt(100);
+						pos = rand.nextInt(99);
 					}
-					System.out.println(pos);
 					String name;
 					try{
 						skipLines(pos, sc);

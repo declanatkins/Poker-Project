@@ -15,6 +15,12 @@ public class Test {
 		int carry = 0;
 		game.dealerPosition = 0;
 		
+		for(PokerPlayer p : game.players){
+			if(!p.isHuman){
+				System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(6));
+			}
+		}
+		
 		while(game.players.size() > 1 && game.players.contains(h)){ // decide on condition to end game 1 players left or human quit?
 			game.dealPhase(game.dealerPosition);
 			game.addCarriedChips(carry);

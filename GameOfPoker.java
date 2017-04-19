@@ -82,21 +82,22 @@ public class GameOfPoker {
 				
 				if(openBet > 0){
 					opener = p;
+					if(!p.isHuman){
+						System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(0));
+					}
 					playersInCurrHand = sortPlayers(playersInCurrHand.indexOf(p));
 					p.setCurrBet(openBet);
 					pot.setCurrBetVal(openBet); 
 					p.addChips(-openBet);
 					pot.placeBet(openBet);
-					if(openBet >0){
-						System.out.println(p.getName() + " opens with " + openBet + " chips!");
-					}
-					else{
-						System.out.println(p.getName() + " doesn't open.");
-					}
+					System.out.println(p.getName() + " opens with " + openBet + " chips!");
 					if(p.getChips() == 0){
 						System.out.println(p.getName() + " is all in!!");
 					}
 					break;//exit out of the loop and move to the next stage
+				}
+				else{
+					System.out.println(p.getName() + " doesn't open.");
 				}
 			}
 			else{
@@ -133,10 +134,17 @@ public class GameOfPoker {
 				}
 				
 				if(bet == 0){
+					if(!p.isHuman){
+						System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
+					}
 					System.out.println(p.getName() + " folds!");
 					playersInCurrHand.remove(p);//no need to increase the counter here
+					
 				}
 				else if(bet == (pot.getCurrBetVal() - p.getCurrBet())){
+					if(!p.isHuman){
+						System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
+					}
 					System.out.println(p.getName() + " calls!");
 					p.addChips(-bet);
 					pot.placeBet(bet);
@@ -146,6 +154,9 @@ public class GameOfPoker {
 					currIndex++;//move up the counter
 				}
 				else{
+					if(!p.isHuman){
+						System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
+					}
 					System.out.println(p.getName() + " raises to " + bet + " chips!");
 					pot.setCurrBetVal(bet);
 					p.addChips(-bet);
@@ -223,6 +234,9 @@ public class GameOfPoker {
 				}
 				if(bet == 0){
 					if(pot.getCurrBetVal() > 0){
+						if(!p.isHuman){
+							System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
+						}
 						System.out.println(p.getName() + " folds!");
 						playersInCurrHand.remove(p);//no need to increase the counter here
 					}
@@ -232,6 +246,9 @@ public class GameOfPoker {
 					}
 				}
 				else if(bet == (pot.getCurrBetVal() - p.getCurrBet())){
+					if(!p.isHuman){
+						System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
+					}
 					System.out.println(p.getName() + " calls!");
 					p.addChips(-bet);
 					pot.placeBet(bet);
@@ -241,6 +258,9 @@ public class GameOfPoker {
 					currIndex++;//move up the counter
 				}
 				else{
+					if(!p.isHuman){
+						System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
+					}
 					System.out.println(p.getName() + " raises to " + bet + " chips!");
 					pot.setCurrBetVal(bet);
 					p.addChips(-bet);
@@ -290,6 +310,18 @@ public class GameOfPoker {
 	}
 	
 	public void endOfHand(){
+		for(PokerPlayer p : playersInCurrHand){
+			if(winners.contains(p)){
+				if(!p.isHuman){
+					System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(4));
+				}
+			}
+			else{
+				if(!p.isHuman){
+					System.out.println(p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(5));
+				}
+			}
+		}
 
 		for(PokerPlayer p : winners){
 			if(winners.size() > 1){

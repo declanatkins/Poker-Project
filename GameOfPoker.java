@@ -53,6 +53,7 @@ public class GameOfPoker {
 	
 	public synchronized int openingPhase(){
 		
+		PokerPlayer opener = new PokerPlayer("tmpName");
 		for(PokerPlayer p : playersInCurrHand){
 			p.resetCurrBet();//reset the bets to 0
 		}
@@ -80,6 +81,7 @@ public class GameOfPoker {
 				}
 				
 				if(openBet > 0){
+					opener = p;
 					playersInCurrHand = sortPlayers(playersInCurrHand.indexOf(p));
 					p.setCurrBet(openBet);
 					pot.setCurrBetVal(openBet); 
@@ -114,6 +116,9 @@ public class GameOfPoker {
 		
 		boolean allMatched = false;
 		int currIndex = 1;
+		if(playersInCurrHand.get(currIndex).getName().equalsIgnoreCase(opener.getName())){
+			currIndex++;
+		}
 		
 		while(!allMatched){
 			PokerPlayer p = playersInCurrHand.get(currIndex);
@@ -277,7 +282,7 @@ public class GameOfPoker {
 				winners = new ArrayList<PokerPlayer>();
 				winners.add(p);
 			}
-			if(p.getHandValue() == highest){
+			if(p.getHandValue() == highest && !winners.contains(p)){
 				winners.add(p);
 			}
 			

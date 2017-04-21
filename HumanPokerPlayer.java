@@ -1,12 +1,23 @@
 package poker;
 
 import java.util.ArrayList;
+import twitter4j.Twitter;
+import twitter4j.User;
+
 import java.util.Scanner;
 public class HumanPokerPlayer extends PokerPlayer{
 	
 	private Scanner sc;
-	
+	private Twitter twitter;
+	private User user;
 
+	public HumanPokerPlayer(User u, Twitter t) {
+		super(u.getName());
+		user = u;
+		twitter = t;
+		sc = new Scanner(System.in);
+		isHuman = true;
+	}
 	public HumanPokerPlayer(String iName) {
 		super(iName);
 		sc = new Scanner(System.in);
@@ -15,6 +26,7 @@ public class HumanPokerPlayer extends PokerPlayer{
 	
 	public void printHand(){
 		System.out.println("Your hand is: " + hand);
+		System.out.println(this.getHandType());
 	}
 	
 	public synchronized int discard(){

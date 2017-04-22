@@ -2,10 +2,20 @@ package poker;
 //This class  is used to test the other classes
 import java.util.Scanner;
 
-public class Test {
 
-	public static synchronized void main(String[] args) {
+public class Test {
+	
+	/*
+	 * This class is now obsolete and should only be used for testing the workings of the 
+	 * actual game and not for the twitterbot part
+	 * 
+	 * to do this you need to uncomment the indicated parts in the HumanPokerPlayer Class
+	 * and comment out the parts for testing the twitter bot
+	 */
+
+	public static synchronized void main(String[] args){
 		Scanner sc = new Scanner(System.in);
+		
 		
 		System.out.println("Welcome to Random Deal's Five Card Draw Poker Game!");
 		System.out.println("Enter your Name to begin:");

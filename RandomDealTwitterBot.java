@@ -6,7 +6,6 @@ import twitter4j.auth.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -54,7 +53,7 @@ public class RandomDealTwitterBot {
 		return twitter;
 	}
 	
-	public synchronized static void main(String[] args) throws IOException, TwitterException, InterruptedException{
+	public synchronized static void main(String[] args) throws IOException, TwitterException{
 		
 		RandomDealTwitterBot twitterBot = new RandomDealTwitterBot();
 		boolean flagGameStart = false;
@@ -86,11 +85,11 @@ public class RandomDealTwitterBot {
 						User u = tw.showUser(idArr[i]);
 						System.out.println(u.getName());
 						HumanPokerPlayer h = new HumanPokerPlayer(u,tw);
-						games.add(new GameOfPoker(2,h,u));
+						games.add(new GameOfPoker(2,h,u, tw));
 					}	
 				}	
 				else{
-					twitterBot.sleep();
+					RandomDealTwitterBot.sleep();
 				}
 			}
 		}
@@ -98,19 +97,41 @@ public class RandomDealTwitterBot {
 		for(GameOfPoker g : games){
 			User u = g.getUser();
 			tw.sendDirectMessage(u.getId(), "Welcome to Random Deal's Five Card Draw Poker Game!");
+			for(PokerPlayer p : g.players){
+				if(!p.isHuman){
+					tw.sendDirectMessage(u.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(6));
+				}
+			}
 		
 		}
 		
-		/*
+		
 		while(!games.isEmpty()){
-			for(GameOfPoker g : games){
-				
+			int carry=0;
+			for(GameOfPoker game : games){
+				game.dealPhase(game.dealerPosition);
+				carry = game.openingPhase(); //if 0 no carry if not amount to carry 
+				if(carry == 0){
+					if(!game.testHandFinished()){
+						game.discardPhase();
+						game.finalBetPhase();
+						if(!game.testHandFinished()){
+							game.showDown();
+						}
+					}
+					game.endOfHand();
+				}
+				game.dealerPosition++;
+				if(game.dealerPosition > game.players.size()-1){
+					game.dealerPosition = 0;
+				}
+				game.addCarriedChips(carry);
 			}
-		}*/
+		}
 		
 	}
 	
-	private void sleep(){//runs this loop to prevent to many requests being made
+	public static void sleep(){//runs this loop to prevent to many requests being made
 		for(long i=0;i<10000000;i++);
 	}
 }

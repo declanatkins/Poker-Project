@@ -1,8 +1,11 @@
 package poker;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 import twitter4j.DirectMessage;
+import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -283,6 +286,21 @@ public class HumanPokerPlayer extends PokerPlayer{
 		boolean flagCorrectMessageRecieved = false;
 		
 		while(!flagCorrectMessageRecieved){
+			Map<String,RateLimitStatus>  status = twitter.getRateLimitStatus();
+			Set<String> keys = status.keySet();
+			for(String k : keys){
+				RateLimitStatus r = status.get(k);
+				if(r.getRemaining() == 0){
+					System.out.println("Waiting for reset...");
+					twitter.sendDirectMessage(user.getId(), "Back to the game soon!");
+					long reset = r.getSecondsUntilReset();
+					long currTime = System.currentTimeMillis();
+					long resetPos = currTime + (reset*1000) + 60000;
+					while(currTime != resetPos){
+						currTime = System.currentTimeMillis();
+					}
+				}
+			}
 			RandomDealTwitterBot.sleep();
 			RandomDealTwitterBot.sleep();
 			ResponseList<DirectMessage> messages = null;

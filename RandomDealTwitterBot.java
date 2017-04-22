@@ -2,12 +2,13 @@ package poker;
 
 import twitter4j.*;
 import twitter4j.auth.*;
-//import twitter4j.api.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 
 public class RandomDealTwitterBot {
@@ -26,7 +27,7 @@ public class RandomDealTwitterBot {
 		 * This part has to be done through the console at our end, so that the twitterbot can
 		 * start working
 		 * 
-		 * all other parts of the program should require no further input from us
+		 * 
 		 */
 		while (null == aT) {
 			System.out.println("Open the following URL and grant access to your account:");
@@ -53,7 +54,7 @@ public class RandomDealTwitterBot {
 		return twitter;
 	}
 	
-	public synchronized static void main(String[] args) throws IOException, TwitterException{
+	public synchronized static void main(String[] args) throws IOException, TwitterException, InterruptedException{
 		
 		RandomDealTwitterBot twitterBot = new RandomDealTwitterBot();
 		boolean flagGameStart = false;
@@ -80,6 +81,7 @@ public class RandomDealTwitterBot {
 					//get the users that have retweeted
 					IDs ids =  tw.getRetweeterIds(s.getId(), -1);
 					long[] idArr = ids.getIDs();
+					System.out.println(idArr.length);
 					for(int i=0;i<idArr.length;i++){
 						User u = tw.showUser(idArr[i]);
 						System.out.println(u.getName());
@@ -110,10 +112,55 @@ public class RandomDealTwitterBot {
 			for(GameOfPoker game : games){
 				game.dealPhase(game.dealerPosition);
 				carry = game.openingPhase(); //if 0 no carry if not amount to carry 
+				Map<String,RateLimitStatus>  status = tw.getRateLimitStatus();
+				Set<String> keys = status.keySet();
+				for(String k : keys){
+					RateLimitStatus r = status.get(k);
+					if(r.getRemaining() == 0){
+						System.out.println("Waiting for reset...");
+						tw.sendDirectMessage(game.getUser().getId(), "Back to the game soon!");
+						long reset = r.getSecondsUntilReset();
+						long currTime = System.currentTimeMillis();
+						long resetPos = currTime + (reset*1000) + 60000;//time until reset plus one minute to ensure reset happens
+						while(currTime != resetPos){
+							currTime = System.currentTimeMillis();
+						}
+					}
+				}
 				if(carry == 0){
 					if(!game.testHandFinished()){
 						game.discardPhase();
+						status = tw.getRateLimitStatus();
+						keys = status.keySet();
+						for(String k : keys){
+							RateLimitStatus r = status.get(k);
+							if(r.getRemaining() == 0){
+								System.out.println("Waiting for reset...");
+								tw.sendDirectMessage(game.getUser().getId(), "Back to the game soon!");
+								long reset = r.getSecondsUntilReset();
+								long currTime = System.currentTimeMillis();
+								long resetPos = currTime + (reset*1000) + 60000;//time until reset plus one minute to ensure reset happens
+								while(currTime != resetPos){
+									currTime = System.currentTimeMillis();
+								}
+							}
+						}
 						game.finalBetPhase();
+						status = tw.getRateLimitStatus();
+						keys = status.keySet();
+						for(String k : keys){
+							RateLimitStatus r = status.get(k);
+							if(r.getRemaining() == 0){
+								System.out.println("Waiting for reset...");
+								tw.sendDirectMessage(game.getUser().getId(), "Back to the game soon!");
+								long reset = r.getSecondsUntilReset();
+								long currTime = System.currentTimeMillis();
+								long resetPos = currTime + (reset*1000) + 60000;
+								while(currTime != resetPos){
+									currTime = System.currentTimeMillis();
+								}
+							}
+						}
 						if(!game.testHandFinished()){
 							game.showDown();
 						}
@@ -134,4 +181,5 @@ public class RandomDealTwitterBot {
 	public static void sleep(){//runs this loop to prevent to many requests being made
 		for(long i=0;i<30000000;i++);
 	}
+	
 }

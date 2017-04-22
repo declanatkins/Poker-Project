@@ -7,12 +7,12 @@ import twitter4j.ResponseList;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
-import twitter4j.api.*;
+//import twitter4j.api.*;
 
-import java.util.Scanner;
+//import java.util.Scanner;
 public class HumanPokerPlayer extends PokerPlayer{
 	
-	private Scanner sc;
+	//private Scanner sc;
 	private Twitter twitter;
 	private User user;
 
@@ -20,7 +20,7 @@ public class HumanPokerPlayer extends PokerPlayer{
 		super(u.getName());
 		user = u;
 		twitter = t;
-		sc = new Scanner(System.in);
+		//sc = new Scanner(System.in);
 		isHuman = true;
 	}
 	/*
@@ -284,10 +284,11 @@ public class HumanPokerPlayer extends PokerPlayer{
 		
 		while(!flagCorrectMessageRecieved){
 			RandomDealTwitterBot.sleep();
+			RandomDealTwitterBot.sleep();
 			ResponseList<DirectMessage> messages = null;
-			while(messages == null){
-				messages = twitter.getDirectMessages();
-			}
+			messages = twitter.getDirectMessages();
+			
+			
 			
 			for(DirectMessage m: messages){
 				if(m.getSender().getId() == user.getId()){

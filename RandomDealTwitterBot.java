@@ -59,7 +59,6 @@ public class RandomDealTwitterBot {
 		boolean flagGameStart = false;
 		List<GameOfPoker> games = new ArrayList<GameOfPoker>();
 		Twitter tw = twitterBot.getTwitter();
-		
 		ResponseList<Status> statuses = tw.getUserTimeline();
 		
 		for(Status s: statuses){//remove last status update to prevent duplications error
@@ -126,12 +125,13 @@ public class RandomDealTwitterBot {
 					game.dealerPosition = 0;
 				}
 				game.addCarriedChips(carry);
+				
 			}
 		}
 		
 	}
 	
 	public static void sleep(){//runs this loop to prevent to many requests being made
-		for(long i=0;i<10000000;i++);
+		for(long i=0;i<30000000;i++);
 	}
 }

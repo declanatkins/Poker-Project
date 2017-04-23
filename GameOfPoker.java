@@ -16,24 +16,6 @@ public class GameOfPoker {
 	private User user;
 	private Twitter tw;
 	
-	/*
-	 * UNCOMMENT THIS FOR TESTING GAMEPLAY
-	 * public GameOfPoker(int cPlayers, HumanPokerPlayer player){
-		numPlayers = cPlayers+1; //computer players + human players
-		players = new ArrayList<PokerPlayer>();
-		ComputerPlayerCreator ComputerPlayers = new ComputerPlayerCreator(cPlayers); //create all computer players
-		players.add(player);//add human player
-		for(PokerPlayer p : ComputerPlayers.getPlayers()){ //add all computer players
-			players.add(p);
-		}
-		
-		deck = new DeckOfCards(); //create deck
-		dealerPosition = 0;
-		pot = new PotOfChips();
-		ante = 10;
-	}
-	*/
-	
 	public GameOfPoker(int cPlayers, HumanPokerPlayer player, User u, Twitter t){
 		user = u;
 		tw = t;
@@ -71,7 +53,6 @@ public class GameOfPoker {
 			p.addChips(-ante); //player places ante
 			pot.placeBet(ante); //ante added to pot
 			p.getDeltHand(deck.dealCards()); //player delt cards
-			//System.out.println(p.getName() + " pays ante of " + ante + " chips!");
 			message += p.getName() + " pays ante of " + ante + " chips!\n";
 		}
 		
@@ -93,7 +74,6 @@ public class GameOfPoker {
 		}
 		
 		if(!openerExists){
-			//System.out.println("No one has openers, going to next hand");
 			tw.sendDirectMessage(user.getId(), "No one has openers, going to next hand");
 			int chips = pot.getChips();
 			pot.reset();
@@ -113,7 +93,6 @@ public class GameOfPoker {
 				if(openBet > 0){
 					opener = p;
 					if(!p.isHuman){
-						//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(0));
 						tw.sendDirectMessage(user.getId(),p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(0));
 					}
 					playersInCurrHand = sortPlayers(playersInCurrHand.indexOf(p));
@@ -121,33 +100,26 @@ public class GameOfPoker {
 					pot.setCurrBetVal(openBet); 
 					p.addChips(-openBet);
 					pot.placeBet(openBet);
-					//System.out.println(p.getName() + " opens with " + openBet + " chips!");
 					tw.sendDirectMessage(user.getId(), p.getName() + " opens with " + openBet + " chips!");
 					if(p.getChips() == 0){
-						//System.out.println(p.getName() + " is all in!!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
 					}
 					break;//exit out of the loop and move to the next stage
 				}
 				else{
-					//System.out.println(p.getName() + " doesn't open.");
 					tw.sendDirectMessage(user.getId(), p.getName() + " doesn't open.");
 				}
 			}
 			else{
 				if(p.isHuman){
 					HumanPokerPlayer h = (HumanPokerPlayer) p;
-					//UNCOMMENT THIS FOR TESTING GAMEPLAY
-					//((HumanPokerPlayer)p).printHand();
-					//System.out.println("You can't open as you don't have a pair or greater");
 					tw.sendDirectMessage(user.getId(), h.getHandAndType() + "\n" + "You can't open as you don;t have a pair or greater.");
 				}
-				//System.out.println(p.getName() + " doesn't open.");
 				tw.sendDirectMessage(user.getId(), p.getName() + " doesn't open");
 			}
 			
 			if(p == playersInCurrHand.get(playersInCurrHand.size()-1)){ //last player does not have openers
-				System.out.println("No openers new hand starting");
+				tw.sendDirectMessage(user.getId(), "No openers new hand starting");
 				return pot.getChips(); //return chips to carry
 				// start new game discard phase will not run and just return;
 			}
@@ -173,41 +145,33 @@ public class GameOfPoker {
 				
 				if(bet == 0){
 					if(!p.isHuman){
-						//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
 					}
-					//System.out.println(p.getName() + " folds!");
 					tw.sendDirectMessage(user.getId(),p.getName() + " folds!" );
 					playersInCurrHand.remove(p);//no need to increase the counter here
 					
 				}
 				else if(bet == (pot.getCurrBetVal() - p.getCurrBet())){
 					if(!p.isHuman){
-						//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
 					}
-					//System.out.println(p.getName() + " calls!");
 					tw.sendDirectMessage(user.getId(), p.getName() + " calls!");
 					p.addChips(-bet);
 					pot.placeBet(bet);
 					if(p.getChips() == 0){
-						//System.out.println(p.getName() + " is all in!!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
 					}
 					currIndex++;//move up the counter
 				}
 				else{
 					if(!p.isHuman){
-						//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
 					}
-					//System.out.println(p.getName() + " raises to " + bet + " chips!");
 					tw.sendDirectMessage(user.getId(),  p.getName() + " raises to " + bet + " chips!");
 					pot.setCurrBetVal(bet);
 					p.addChips(-bet);
 					pot.placeBet(bet);
 					if(p.getChips() == 0){
-						//System.out.println(p.getName() + " is all in!!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
 					}
 					currIndex++;
@@ -237,7 +201,6 @@ public class GameOfPoker {
 	  //phase returns 0 if no carrys if there is a carry then return the amount to add to pot next time
 	
 	public synchronized void discardPhase() throws TwitterException{
-		System.out.println("!!");
 		int discarded = 0;
 		for(PokerPlayer p : playersInCurrHand){
 			if(p.isHuman){
@@ -250,11 +213,9 @@ public class GameOfPoker {
 			}
 			
 			if(discarded > 0){
-				//System.out.println(p.getName() + " discards " + discarded + " cards!");
 				tw.sendDirectMessage(user.getId(), p.getName() + " discards " + discarded + " cards!");
 			}
 			else{
-				//System.out.println(p.getName() + " chooses not to discard!");
 				tw.sendDirectMessage(user.getId(),p.getName() + " chooses not to discard!");
 			}
 		}
@@ -284,46 +245,37 @@ public class GameOfPoker {
 				if(bet == 0){
 					if(pot.getCurrBetVal() > 0){
 						if(!p.isHuman){
-							//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
 							tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
 						}
-						//System.out.println(p.getName() + " folds!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " folds!");
 						playersInCurrHand.remove(p);//no need to increase the counter here
 					}
 					else{
-						//System.out.println(p.getName() + " checks!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " checks!");
 						currIndex++;
 					}
 				}
 				else if(bet == (pot.getCurrBetVal() - p.getCurrBet())){
 					if(!p.isHuman){
-						//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
 						tw.sendDirectMessage(user.getId(),p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
 					}
-					//System.out.println(p.getName() + " calls!");
 					tw.sendDirectMessage(user.getId(), p.getName() + " calls!");
 					p.addChips(-bet);
 					pot.placeBet(bet);
 					if(p.getChips() == 0){
-						//System.out.println(p.getName() + " is all in!!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
 					}
 					currIndex++;//move up the counter
 				}
 				else{
 					if(!p.isHuman){
-						//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
 					}
-					//System.out.println(p.getName() + " raises to " + bet + " chips!");
 					tw.sendDirectMessage(user.getId(), p.getName() + " raises to " + bet + " chips!");
 					pot.setCurrBetVal(bet);
 					p.addChips(-bet);
 					pot.placeBet(bet);
 					if(p.getChips() == 0){
-						//System.out.println(p.getName() + " is all in!!");
 						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
 					}
 					currIndex++;
@@ -353,7 +305,6 @@ public class GameOfPoker {
 	public void showDown() throws TwitterException{
 		int highest = 0; //stores index of player with highest hand.
 		for(PokerPlayer p: playersInCurrHand){
-			//System.out.println(p.getName() + " has " + p.getHand() + "!\n" + p.getHandType());
 			tw.sendDirectMessage(user.getId(), p.getName() + " has " + p.getHand() + "!\n" + p.getHandType());
 			
 			if(p.getHandValue() > highest){
@@ -372,13 +323,11 @@ public class GameOfPoker {
 		for(PokerPlayer p : playersInCurrHand){
 			if(winners.contains(p)){
 				if(!p.isHuman){
-					//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(4));
 					tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(4));
 				}
 			}
 			else{
 				if(!p.isHuman){
-					//System.out.println("\n" + p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(5));
 					tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(5));
 				}
 			}
@@ -386,18 +335,14 @@ public class GameOfPoker {
 
 		for(PokerPlayer p : winners){
 			if(winners.size() > 1){
-				//System.out.println(p.getName()+ " splits the pot and gets " + (pot.getChips()/winners.size()) + " chips!");
 				tw.sendDirectMessage(user.getId(), p.getName()+ " splits the pot and gets " + (pot.getChips()/winners.size()) + " chips!");
 				p.addChips(pot.getChips()/winners.size());
 			}
 			else{
-				//System.out.println(p.getName()+ " wins the pot and gets " + (pot.getChips()) + " chips!");
 				tw.sendDirectMessage(user.getId(), p.getName()+ " wins the pot and gets " + (pot.getChips()) + " chips!");
 				p.addChips(pot.getChips());
 			}
 		}
-		//System.out.println("\n\n\n\n");
-		
 		for(int i=0;i<players.size();i++){
 			if(players.get(i).getChips() <=0 && !players.get(i).isHuman){
 				players.remove(i);

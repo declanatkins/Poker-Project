@@ -2,22 +2,19 @@ package poker;
 
 import twitter4j.*;
 import twitter4j.auth.*;
-
+import javax.swing.JOptionPane;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class RandomDealTwitterBot {
 	
 
 	private Twitter twitter;
-	private Scanner sc;
 	private AccessToken aT;
 	
 	public RandomDealTwitterBot() throws IOException, TwitterException{
 		twitter = new TwitterFactory().getInstance(); 
-		sc = new Scanner(System.in);
 		twitter.setOAuthConsumer("ZgE1zJHbogbkzy2zmFnFfQLPd", "xJ588TfGrnjAMYbOAgc9TeKdhChohPVD5d4gVwN0l5cm8H2JSr");
 		RequestToken rT = twitter.getOAuthRequestToken();
 		/*
@@ -27,10 +24,8 @@ public class RandomDealTwitterBot {
 		 * This is the only part of the program that requires console input
 		 */
 		while (null == aT) {
-			System.out.println("Open the following URL and grant access to your account:");
-			System.out.println(rT.getAuthorizationURL());
-			System.out.print("Enter the PIN:");
-			String pin = sc.nextLine();
+			JOptionPane.showInputDialog("Open the following URL and grant access to your account:\n", rT.getAuthorizationURL());
+			String pin = JOptionPane.showInputDialog("Enter the PIN:");
 			try{
 				if(pin.length() > 0){
 					aT = twitter.getOAuthAccessToken(rT, pin);
@@ -50,16 +45,16 @@ public class RandomDealTwitterBot {
 		 * crashes due to exceeding the rate limit
 		 */
 		twitter.addRateLimitStatusListener( new RateLimitStatusListener() {
-		    public void onRateLimitStatus( RateLimitStatusEvent event ) {
+		    public synchronized void onRateLimitStatus( RateLimitStatusEvent event ) {
 		        System.out.println("Limit["+event.getRateLimitStatus().getLimit() + "], Remaining[" +event.getRateLimitStatus().getRemaining()+"]");
 		    }
 
-		    public void onRateLimitReached( RateLimitStatusEvent event ) {
+		    public synchronized void onRateLimitReached( RateLimitStatusEvent event ) {
 		    	RateLimitStatus r = event.getRateLimitStatus();
-		    	System.out.println("Waiting for reset...");
+		    	System.out.println("Waiting for reset...\n" + r.getSecondsUntilReset());
 				long reset = r.getSecondsUntilReset();
 				long currTime = System.currentTimeMillis();
-				long resetPos = currTime + (reset*1000) + 30000;//time until reset plus 30secs to ensure reset happens
+				long resetPos = currTime + (reset*1000);//time until reset plus 30secs to ensure reset happens
 				while(currTime != resetPos){
 					currTime = System.currentTimeMillis();
 				}
@@ -191,7 +186,7 @@ public class RandomDealTwitterBot {
 	}
 	
 	public static void sleep(){//runs this loop to prevent to many requests being made
-		for(long i=0;i<60000000;i++);
+		for(long i=0;i<120000000;i++);
 		return;
 	}
 	

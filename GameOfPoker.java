@@ -142,7 +142,7 @@ public class GameOfPoker {
 				else{
 					bet = ((ComputerPokerPlayer)p).getBet(pot, true);
 				}
-				
+				p.setCurrBet(bet);
 				if(bet == 0){
 					if(!p.isHuman){
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(3));
@@ -151,19 +151,7 @@ public class GameOfPoker {
 					playersInCurrHand.remove(p);//no need to increase the counter here
 					
 				}
-				else if(bet == (pot.getCurrBetVal() - p.getCurrBet())){
-					if(!p.isHuman){
-						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
-					}
-					tw.sendDirectMessage(user.getId(), p.getName() + " calls!");
-					p.addChips(-bet);
-					pot.placeBet(bet);
-					if(p.getChips() == 0){
-						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
-					}
-					currIndex++;//move up the counter
-				}
-				else{
+				else if (p.getCurrBet() > pot.getCurrBetVal()){
 					if(!p.isHuman){
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
 					}
@@ -176,8 +164,19 @@ public class GameOfPoker {
 					}
 					currIndex++;
 				}
+				else{
+					if(!p.isHuman){
+						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
+					}
+					tw.sendDirectMessage(user.getId(), p.getName() + " calls!");
+					p.addChips(-bet);
+					pot.placeBet(bet);
+					if(p.getChips() == 0){
+						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
+					}
+					currIndex++;//move up the counter
+				}
 				
-				p.setCurrBet(bet);
 			}
 			else{
 				System.out.println(p.getName() + "," + p.getCurrBet());
@@ -226,6 +225,7 @@ public class GameOfPoker {
 		for(PokerPlayer p : playersInCurrHand){
 			p.resetCurrBet();//reset the bets to 0
 		}
+		tw.sendDirectMessage(user.getId(), "The pot is " + pot.getChips());
 		pot.setCurrBetVal(0);
 		
 		boolean allMatched = false;
@@ -242,6 +242,7 @@ public class GameOfPoker {
 				else{
 					bet = ((ComputerPokerPlayer)p).getBet(pot, true);
 				}
+				p.setCurrBet(bet);
 				if(bet == 0){
 					if(pot.getCurrBetVal() > 0){
 						if(!p.isHuman){
@@ -255,19 +256,7 @@ public class GameOfPoker {
 						currIndex++;
 					}
 				}
-				else if(bet == (pot.getCurrBetVal() - p.getCurrBet())){
-					if(!p.isHuman){
-						tw.sendDirectMessage(user.getId(),p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
-					}
-					tw.sendDirectMessage(user.getId(), p.getName() + " calls!");
-					p.addChips(-bet);
-					pot.placeBet(bet);
-					if(p.getChips() == 0){
-						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
-					}
-					currIndex++;//move up the counter
-				}
-				else{
+				else if (p.getCurrBet() > pot.getCurrBetVal()){
 					if(!p.isHuman){
 						tw.sendDirectMessage(user.getId(), p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(2));
 					}
@@ -280,8 +269,18 @@ public class GameOfPoker {
 					}
 					currIndex++;
 				}
-				
-				p.setCurrBet(bet);
+				else{
+					if(!p.isHuman){
+						tw.sendDirectMessage(user.getId(),p.getName() + ": " + ((ComputerPokerPlayer)p).getChat(1));
+					}
+					tw.sendDirectMessage(user.getId(), p.getName() + " calls!");
+					p.addChips(-bet);
+					pot.placeBet(bet);
+					if(p.getChips() == 0){
+						tw.sendDirectMessage(user.getId(), p.getName() + " is all in!!");
+					}
+					currIndex++;//move up the counter
+				}
 			}
 			else{
 				allMatched = true;
@@ -356,7 +355,8 @@ public class GameOfPoker {
 		return handFinished;
 	}
 	
-	public void addCarriedChips(int carry){
+	public void addCarriedChips(int carry) throws TwitterException{
+		tw.sendDirectMessage(user.getId(), carry + " chips carried to the next pot!");
 		pot.placeBet(carry);
 	}
 	

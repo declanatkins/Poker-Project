@@ -2,7 +2,6 @@ package poker;
 
 import twitter4j.*;
 import twitter4j.auth.*;
-import javax.swing.JOptionPane;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,34 +11,14 @@ public class RandomDealTwitterBot {
 
 	private Twitter twitter;
 	private AccessToken aT;
+	private String savedAccessToken = "854883872944910341-TYldkevNlelZDq3p52XIn50XaAoY0gL";
+	private String savedAccessTokenSecret = "rjnWPusOsEXNvGavdK185v5p5p1csQwWWYwxIPGCddvYc";
 	
 	public RandomDealTwitterBot() throws IOException, TwitterException{
 		twitter = new TwitterFactory().getInstance(); 
 		twitter.setOAuthConsumer("ZgE1zJHbogbkzy2zmFnFfQLPd", "xJ588TfGrnjAMYbOAgc9TeKdhChohPVD5d4gVwN0l5cm8H2JSr");
-		RequestToken rT = twitter.getOAuthRequestToken();
-		/*
-		 * This part has to be done through the console at our end, so that the twitterbot can
-		 * start working
-		 * 
-		 * This is the only part of the program that requires console input
-		 */
-		while (null == aT) {
-			JOptionPane.showInputDialog("Open the following URL and grant access to your account:\n", rT.getAuthorizationURL());
-			String pin = JOptionPane.showInputDialog("Enter the PIN:");
-			try{
-				if(pin.length() > 0){
-					aT = twitter.getOAuthAccessToken(rT, pin);
-				}else{
-					aT = twitter.getOAuthAccessToken();
-				}
-			} catch (TwitterException te) {
-				if(401 == te.getStatusCode()){
-					System.out.println("Unable to get the access token.");
-				}else{
-					te.printStackTrace();
-				}
-			}
-		}
+		aT = new AccessToken(savedAccessToken, savedAccessTokenSecret);
+		twitter.setOAuthAccessToken(aT);
 		/*
 		 * Adds a rate limit status listener so that the game never 
 		 * crashes due to exceeding the rate limit
@@ -78,7 +57,7 @@ public class RandomDealTwitterBot {
 		for(Status s: statuses){//remove last status update to prevent duplications error
 			tw.destroyStatus(s.getId());	
 		}
-		StatusUpdate su = new StatusUpdate("Fancy a game? Follow us and retweet this status for some cards, some fun and maybe more ;) - Sent by RD Twitter Bot");
+		StatusUpdate su = new StatusUpdate("Fancy a game? Follow us and retweet this status to play Five Card Draw Poker! - Sent by RD Twitter Bot");
 		tw.updateStatus(su);
 		
 		/*
@@ -120,8 +99,10 @@ public class RandomDealTwitterBot {
 		
 		while(!games.isEmpty()){
 			int carry=0;
+			List<GameOfPoker> gamesToRemove = new ArrayList<GameOfPoker>();
 			for(GameOfPoker game : games){
 				synchronized(game){
+					boolean flagGameFinished = false;
 					game.dealPhase(game.dealerPosition);
 					carry = game.openingPhase(); //if 0 no carry if not amount to carry 
 					if(carry == 0){
@@ -139,13 +120,21 @@ public class RandomDealTwitterBot {
 						game.dealerPosition = 0;
 					}
 					game.addCarriedChips(carry);
-					
-					if(games.size() > 1){
+					if(game.isFinished()){//test if the game is finished
+						flagGameFinished = true;
+						gamesToRemove.add(game);
+					}
+					if(games.size() > 1 && !flagGameFinished){
 						//let the user know that we're dealing with a different user now
 						tw.sendDirectMessage(game.getUser().getId(), "Another user is also playing, we'll be back soon!");
 					}
 				
 				}
+			}
+			
+			for(GameOfPoker g: gamesToRemove){//remove finished games from the list
+				tw.sendDirectMessage(g.getUser().getId(), "Goodbye and thanks for playing!");
+				games.remove(g);
 			}
 			//here we will check if any other users have retweeted the status. If they have
 			//we can also create them and add them to the list of games

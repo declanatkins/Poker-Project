@@ -1,7 +1,6 @@
 package poker;
 
 import java.util.ArrayList;
-
 import twitter4j.DirectMessage;
 import twitter4j.ResponseList;
 import twitter4j.Twitter;
@@ -48,7 +47,6 @@ public class HumanPokerPlayer extends PokerPlayer{
 		if(n > 0){
 			twitter.sendDirectMessage(user.getId(), "Recommend you discard the following cards:");
 			for(int i=0;i<n;i++){
-				System.out.println(suggestCards.get(i) + ", at position " + hand.getHand().indexOf(suggestCards.get(i)));
 				twitter.sendDirectMessage(user.getId(), suggestCards.get(i) + ", at position " + hand.getHand().indexOf(suggestCards.get(i)));
 			}
 		}
@@ -113,6 +111,7 @@ public class HumanPokerPlayer extends PokerPlayer{
 		int bet=0;
 		int currBetVal = pot.getCurrBetVal();
 		String message = getHandAndType();
+		twitter.sendDirectMessage(user.getId(), "You have " + numChips + " chips!");
 		if(currBetVal == 0){
 			twitter.sendDirectMessage(user.getId(), message + "\nCheck or bet?\nTo check enter 0, to bet, enter the number of chips");
 		}
@@ -169,6 +168,7 @@ public class HumanPokerPlayer extends PokerPlayer{
 
 		String message = this.getHandAndType();
 		message += "\nWould you Like to open the hand?\"To open enter a bet, otherwise enter 0";
+		twitter.sendDirectMessage(user.getId(), "You have " + numChips + " chips!");
 		twitter.sendDirectMessage(user.getId(), message);
 		int bet=0;
 		boolean valid = false;

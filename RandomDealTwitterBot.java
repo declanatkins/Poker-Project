@@ -170,6 +170,14 @@ public class RandomDealTwitterBot {
 					}
 				}
 			}
+			
+			//Update status to get allow more people to see that the game is still active
+			statuses = tw.getUserTimeline();
+			for(Status s: statuses){
+				tw.destroyStatus(s.getId());	
+			}
+			su = new StatusUpdate("Fancy a game? Follow us and retweet this status to play Five Card Draw Poker! - Sent by RD Twitter Bot");
+			tw.updateStatus(su);
 		}
 		
 	}
